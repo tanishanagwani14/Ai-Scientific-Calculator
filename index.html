@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AI Smart Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+  * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+  }
+
+  .calculator {
+    width: 360px;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .header h2 {
+    margin: 0;
+  }
+
+  .toggle {
+    background: #38bdf8;
+    color: #000;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+
+  .screen {
+    background: #020617;
+    border-radius: 12px;
+    padding: 15px;
+    margin: 15px 0;
+    text-align: right;
+    font-size: 26px;
+    min-height: 50px;
+    overflow-x: auto;
+  }
+
+  .ai-hint {
+    font-size: 12px;
+    color: #7dd3fc;
+    margin-bottom: 10px;
+    min-height: 18px;
+  }
+
+  .buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+
+  button {
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    transition: 0.2s;
+  }
+
+  button:hover {
+    background: rgba(255,255,255,0.3);
+  }
+
+  .operator { background: #38bdf8; color: #000; }
+  .equal { background: #22c55e; color: #000; grid-column: span 2; }
+  .clear { background: #ef4444; }
+
+  .scientific {
+    display: none;
+    margin-top: 10px;
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .scientific.show {
+    display: grid;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="calculator">
+  <div class="header">
+    <h2>🤖 AI Calculator</h2>
+    <button class="toggle" onclick="toggleScientific()">Scientific</button>
+  </div>
+
+  <div class="screen" id="screen">0</div>
+  <div class="ai-hint" id="aiHint">AI Tip: Try switching to scientific mode</div>
+
+  <div class="buttons">
+    <button class="clear" onclick="clearScreen()">C</button>
+    <button onclick="del()">⌫</button>
+    <button onclick="add('%')">%</button>
+    <button class="operator" onclick="add('/')">÷</button>
+
+    <button onclick="add('7')">7</button>
+    <button onclick="add('8')">8</button>
+    <button onclick="add('9')">9</button>
+    <button class="operator" onclick="add('*')">×</button>
+
+    <button onclick="add('4')">4</button>
+    <button onclick="add('5')">5</button>
+    <button onclick="add('6')">6</button>
+    <button class="operator" onclick="add('-')">−</button>
+
+    <button onclick="add('1')">1</button>
+    <button onclick="add('2')">2</button>
+    <button onclick="add('3')">3</button>
+    <button class="operator" onclick="add('+')">+</button>
+
+    <button onclick="add('0')">0</button>
+    <button onclick="add('.')">.</button>
+    <button class="equal" onclick="calculate()">=</button>
+  </div>
+
+  <div class="buttons scientific" id="sci">
+    <button onclick="func('sin')">sin</button>
+    <button onclick="func('cos')">cos</button>
+    <button onclick="func('tan')">tan</button>
+    <button onclick="func('log')">log</button>
+
+    <button onclick="func('sqrt')">√</button>
+    <button onclick="func('pow')">x²</button>
+    <button onclick="func('pi')">π</button>
+    <button onclick="func('e')">e</button>
+  </div>
+</div>
+
+<script>
+let screen = document.getElementById("screen");
+let aiHint = document.getElementById("aiHint");
+let sci = document.getElementById("sci");
+let scientific = false;
+
+function add(value) {
+  if (screen.innerText === "0") screen.innerText = "";
+  screen.innerText += value;
+  aiAnalyze(value);
+}
+
+function clearScreen() {
+  screen.innerText = "0";
+  aiHint.innerText = "AI Tip: Calculator cleared";
+}
+
+function del() {
+  screen.innerText = screen.innerText.slice(0, -1) || "0";
+}
+
+function calculate() {
+  try {
+    screen.innerText = eval(screen.innerText);
+    aiHint.innerText = "AI Insight: Calculation successful";
+  } catch {
+    screen.innerText = "Error";
+    aiHint.innerText = "AI Warning: Invalid expression";
+  }
+}
+
+function toggleScientific() {
+  scientific = !scientific;
+  sci.classList.toggle("show");
+  aiHint.innerText = scientific
+    ? "AI Mode: Scientific functions enabled"
+    : "AI Mode: Normal calculator active";
+}
+
+function func(type) {
+  let val = parseFloat(screen.innerText);
+  let result;
+
+  if (type === "sin") result = Math.sin(val);
+  if (type === "cos") result = Math.cos(val);
+  if (type === "tan") result = Math.tan(val);
+  if (type === "log") result = Math.log10(val);
+  if (type === "sqrt") result = Math.sqrt(val);
+  if (type === "pow") result = Math.pow(val, 2);
+  if (type === "pi") result = Math.PI;
+  if (type === "e") result = Math.E;
+
+  screen.innerText = result;
+  aiHint.innerText = `AI Insight: ${type} applied`;
+}
+
+function aiAnalyze(input) {
+  if (input === "%") aiHint.innerText = "AI Tip: Percentage is useful for discounts";
+  if (input === "/") aiHint.innerText = "AI Tip: Division by zero gives error";
+  if (input === "*") aiHint.innerText = "AI Tip: Multiplication shortcut activated";
+}
+</script>
+
+</body>
+</html>
